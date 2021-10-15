@@ -13,4 +13,6 @@ public interface GreetingsService {
      */
     Greetings getGreetings( String name);
 
+    Greetings doNothing( Greetings greetings);
+
 }

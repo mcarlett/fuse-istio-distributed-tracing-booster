@@ -1,5 +1,6 @@
 package com.redhat.fuse.boosters.istio.dt;
 
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,7 +40,31 @@ public class CamelRouter extends RouteBuilder {
             .log(" Try to call name Service")
             .to("http://"+nameServiceHost+":"+nameServicePort+"/camel/name?bridgeEndpoint=true")
             .log(" Successfully called name Service")
-            .to("bean:greetingsService?method=getGreetings");     
+            .to("bean:greetingsService?method=getGreetings")
+            .log(" Internal route called")
+            .to("direct:internal-route");
+
+        from("direct:internal-route").routeId("internal-route")
+             .log(" Running internal route")
+             .to("seda:a")
+             .to("bean:greetingsService?method=doNothing");
+
+        from("seda:a").routeId("a")
+                .process((exchange) -> {
+                    log.info("route a");
+                })
+                .to("seda:b")
+                .to("seda:c");
+
+        from("seda:b").routeId("b")
+                .process((exchange) -> {
+                    log.info("route b");
+                });
+
+        from("seda:c").routeId("c")
+                .process((exchange) -> {
+                    log.info("route c");
+                });
         // @formatter:on
     }
 

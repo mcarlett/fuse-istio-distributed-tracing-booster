@@ -13,4 +13,8 @@ public class GreetingsServiceImpl implements GreetingsService {
         return new Greetings( THE_GREETINGS + name );
     }
 
+    @Override
+    public Greetings doNothing(Greetings greetings) {
+        return greetings;
+    }
 }
